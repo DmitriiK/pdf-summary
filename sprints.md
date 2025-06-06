@@ -29,6 +29,6 @@ The upper part of that page is a list of files with file names and upload dates.
 - your solution should be simple
 - Use uv as package manager and .toml files for dependencies
 - Use storage acount connection string for access to the queue
-- storage account connection string and Gemini token should be in .env file
+- storage account connection string and Gemini API KEY should be in .env file
 - path to SQL DB, upload directory path should be specified in separate configuration py file
 

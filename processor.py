@@ -1,11 +1,17 @@
 import os
-import sqlite3
+import pathlib
 from datetime import datetime
-from azure.storage.queue import QueueClient
-from google.generativeai import GenerativeModel
-import config
 
-UPLOAD_DIR = "uploads"
+import sqlite3
+from dotenv import load_dotenv
+
+from azure.storage.queue import QueueClient
+from google import genai
+from google.genai import types
+
+import config
+load_dotenv()
+
 def init_db():
     with sqlite3.connect(config.DB_PATH) as conn:
         conn.execute('''CREATE TABLE IF NOT EXISTS pdfs (
@@ -14,7 +20,6 @@ def init_db():
             upload_date TEXT,
             summary TEXT
         )''')
-
 
 def process_queue():
     queue_client = QueueClient.from_connection_string(
@@ -25,7 +30,7 @@ def process_queue():
             for msg in msg_batch:
                 file_path = msg.content
                 file_name = os.path.basename(file_path)
-                # Summarize PDF using Gemini (placeholder)
+                # TODO use hash sums to avoid processing of the same file been uploaded twice
                 summary = summarize_pdf_with_gemini(file_path)
                 upload_date = datetime.now().isoformat()
                 with sqlite3.connect(config.DB_PATH) as conn:
@@ -38,11 +43,16 @@ def process_queue():
         break
 
 def summarize_pdf_with_gemini(file_path):
-    # Placeholder for Gemini API call
-    # model = GenerativeModel(token=config.GEMINI_TOKEN)
-    # summary = model.summarize_pdf(file_path)
-    # return summary
-    return f"Summary for {os.path.basename(file_path)} (Gemini placeholder)"
+    client = genai.Client()
+    file_path = pathlib.Path(file_path)
+    # Upload the PDF using the File API
+    sample_file = client.files.upload(
+    file=file_path,
+    )
+    response = client.models.generate_content(
+    model=config.LLM_MODEL,
+    contents=[sample_file, "Summarize this document"])
+    return response.text
 
 if __name__ == "__main__":
     init_db()
