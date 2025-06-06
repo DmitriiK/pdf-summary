@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Uploader</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2em; }
+        .container { max-width: 600px; margin: auto; }
+        .status { margin: 1em 0; color: green; }
+        table { width: 100%; border-collapse: collapse; margin-top: 2em; }
+        th, td { border: 1px solid #ccc; padding: 0.5em; text-align: left; }
+        th { background: #f0f0f0; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Upload PDF</h2>
+    <form id="uploadForm">
+        <input type="file" id="pdfFile" accept="application/pdf" required />
+        <button type="submit">Upload</button>
+    </form>
+    <div class="status" id="status"></div>
+    <h3>Uploaded Files</h3>
+    <table id="filesTable">
+        <thead>
+            <tr><th>File Name</th><th>Upload Date</th><th>Summary</th></tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+<script>
+const apiBase = 'http://localhost:8000';
+const statusDiv = document.getElementById('status');
+const filesTableBody = document.querySelector('#filesTable tbody');
+
+function fetchFiles() {
+    fetch(`${apiBase}/files`)
+        .then(r => r.json())
+        .then(files => {
+            filesTableBody.innerHTML = '';
+            files.forEach(f => {
+                const row = `<tr><td>${f.file_name}</td><td>${f.upload_date}</td><td>${f.summary}</td></tr>`;
+                filesTableBody.innerHTML += row;
+            });
+        });
+}
+
+document.getElementById('uploadForm').onsubmit = function(e) {
+    e.preventDefault();
+    const fileInput = document.getElementById('pdfFile');
+    if (!fileInput.files.length) return;
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+    statusDiv.textContent = 'Uploading...';
+    fetch(`${apiBase}/upload`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (res.status === 'success') {
+            statusDiv.textContent = 'Upload successful!';
+            fetchFiles();
+        } else {
+            statusDiv.textContent = 'Upload failed.';
+        }
+    })
+    .catch(() => statusDiv.textContent = 'Upload failed.');
+};
+
+fetchFiles();
+</script>
+</body>
+</html>
