@@ -1,10 +1,15 @@
+
+import logging
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
-import sqlite3
 from datetime import datetime
 import os
+from azure.storage.queue import QueueClient
+import config
+import sqlite3
 
+logging.basicConfig(level=logging.INFO)
 app = FastAPI()
 
 # Allow CORS for local frontend
@@ -16,40 +21,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-DB_PATH = "pdfs.db"
-UPLOAD_DIR = "uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+os.makedirs(config.UPLOAD_DIR, exist_ok=True)
 
-def init_db():
-    with sqlite3.connect(DB_PATH) as conn:
-        conn.execute('''CREATE TABLE IF NOT EXISTS pdfs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            file_name TEXT,
-            upload_date TEXT,
-            summary TEXT
-        )''')
 
-init_db()
 
 @app.post("/upload")
 async def upload_pdf(file: UploadFile = File(...)):
     if not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are allowed.")
-    file_path = os.path.join(UPLOAD_DIR, file.filename)
+    file_path = os.path.join(config.UPLOAD_DIR, file.filename)
     with open(file_path, "wb") as f:
         f.write(await file.read())
-    summary = f"Summary for {file.filename}"  # Placeholder summary
-    upload_date = datetime.now().isoformat()
-    with sqlite3.connect(DB_PATH) as conn:
-        conn.execute(
-            "INSERT INTO pdfs (file_name, upload_date, summary) VALUES (?, ?, ?)",
-            (file.filename, upload_date, summary)
-        )
-    return {"status": "success", "file_name": file.filename}
+    logging.info(f'adding of file {file_path} to the queue')
+    queue_client = QueueClient.from_connection_string(
+        config.AZURE_QUEUE_CONNECTION_STRING, config.QUEUE_NAME)
+    queue_client.send_message(file_path)
+    logging.info(f'Have added file {file_path} to the queue')
+    return {"status": "queued", "file_name": file.filename, "upload_date": datetime.now()}
 
 @app.get("/files")
 def list_files():
-    with sqlite3.connect(DB_PATH) as conn:
+    with sqlite3.connect(config.DB_PATH) as conn:
         rows = conn.execute("SELECT file_name, upload_date, summary FROM pdfs ORDER BY id DESC").fetchall()
     files = [
         {"file_name": r[0], "upload_date": r[1], "summary": r[2]} for r in rows
