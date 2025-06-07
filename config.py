@@ -9,6 +9,7 @@ QUEUE_NAME = 'queuepdfprocessing'
 DB_PATH='pdfs.db'
 UPLOAD_DIR = 'uploads'
 LLM_MODEL = "gemini-2.0-flash"
+POLLING_INTERVAL = 2  # seconds - to avoid too frequent polling of azure queue
 
 AZURE_QUEUE_CONNECTION_STRING = os.getenv("AZURE_QUEUE_CONNECTION_STRING")
 

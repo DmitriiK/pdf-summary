@@ -1,7 +1,9 @@
-import sqlite3
-from dotenv import load_dotenv
 import pathlib
 import datetime
+import time
+
+from dotenv import load_dotenv
+import sqlite3
 from azure.storage.queue import QueueClient
 from google import genai
 
@@ -12,6 +14,7 @@ load_dotenv()
 def process_queue():
     queue_client = QueueClient.from_connection_string(
         config.AZURE_QUEUE_CONNECTION_STRING, config.QUEUE_NAME)
+    print('Queue client created, starting to process messages')
     while True:
         messages = queue_client.receive_messages(messages_per_page=1)
         for msg_batch in messages.by_page():
@@ -28,9 +31,8 @@ def process_queue():
                         "INSERT OR REPLACE INTO pdfs (file_name, upload_date, processed_date, summary) VALUES (?, ?, ?, ?)",
                         (file_name, upload_date, procecessing_date, summary)
                     )
-                queue_client.delete_message(msg)
-        # Sleep or break for demo; in production, use time.sleep()
-        break
+                    print('message processed and saved to the database')
+            time.sleep(config.POLLING_INTERVAL)
 
 def summarize_pdf_with_gemini(file_path):
     client = genai.Client()
