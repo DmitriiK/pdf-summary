@@ -23,15 +23,18 @@ def process_queue():
                 file_path = message_data.file_path
                 file_name = message_data.file_name
                 # TODO use hash sums to avoid processing of the same file been uploaded twice
+                print(f'Processing file: {file_name}')
                 summary = summarize_pdf_with_gemini(file_path)
-                upload_date = message_data.upload_date.isoformat()
-                procecessing_date = datetime.datetime.now().isoformat()
+                upload_date = message_data.upload_date
+                processed_date = datetime.datetime.now().isoformat()
                 with sqlite3.connect(config.DB_PATH) as conn:
                     conn.execute(
-                        "INSERT OR REPLACE INTO pdfs (file_name, upload_date, processed_date, summary) VALUES (?, ?, ?, ?)",
-                        (file_name, upload_date, procecessing_date, summary)
+                         """INSERT INTO pdfs (file_name, upload_date, processed_date, summary) VALUES (?, ?, ?, ?) 
+                          ON CONFLICT(file_name) DO UPDATE SET upload_date=excluded.upload_date, summary=excluded.summary""",
+                        (file_name, upload_date, processed_date, summary)
                     )
-                    print('message processed and saved to the database')
+                queue_client.delete_message(msg)
+                print('message processed and saved to the database')
             time.sleep(config.POLLING_INTERVAL)
 
 def summarize_pdf_with_gemini(file_path):

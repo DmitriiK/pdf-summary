@@ -6,11 +6,12 @@ def init_db():
     with sqlite3.connect(config.DB_PATH) as conn:
         conn.execute('''CREATE TABLE IF NOT EXISTS pdfs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            file_name TEXT,
+            file_name TEXT UNIQUE,
             upload_date TEXT,
-            processed_date TEXT,   -- looks like SQLite does not have type for dates     
+            processed_date TEXT,
             summary TEXT
         )''')
+    print(f"Database {config.DB_PATH} initialized with table 'pdfs'.")
 
 
 if __name__ == "__main__":
