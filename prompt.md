@@ -10,8 +10,9 @@ Web page to upload file:
 - Persist the results of that process with attributes: file_name, upload_date, summary
 
 ## Web page to display the results
-The upper part of that page is a list of files with file names and upload and processing dates.
-The bottom part is the summary for the file that has been selected in the grid in the upper part. Highlight file name in the grid as link, each time user clicks it the bottom part should display summary in scrollable text-box
+- The upper part of that page is a list of files with file names and upload and processing dates.
+- The bottom part is the summary for the file that has been selected in the grid in the upper part. Highlight file name in the grid as link, each time user clicks it the bottom part should display summary in scrollable text-box
+-  polling from FE of DB to refresh grid once new records appeared. Use ID column from DB for that
 
 # Non-functional requirements
 - Use only HTML, CSS, and JavaScript for the front-end
@@ -21,7 +22,7 @@ The bottom part is the summary for the file that has been selected in the grid i
 - We are using uv as packet manager
 
 # Assumptions
-- File names are unique. If the file is already uploaded we should update data in persistence layer
+- File names are unique. If the file is already uploaded we should update data in DB
 
 # Deployment
 - All this supposed to be launched on Azure VM. Write as separate .md file some manual for deployment

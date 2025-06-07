@@ -45,11 +45,26 @@ const statusDiv = document.getElementById('status');
 const filesTableBody = document.querySelector('#filesTable tbody');
 const summaryBox = document.getElementById('summaryBox');
 let filesList = [];
+let lastMaxId = null;
+let pollingInterval = null;
 
-function fetchFiles() {
+function fetchFiles(updateSummary = true) {
     fetch(`${apiBase}/files`)
         .then(r => r.json())
         .then(files => {
+            if (files.length === 0) {
+                filesList = [];
+                filesTableBody.innerHTML = '';
+                summaryBox.value = '';
+                lastMaxId = null;
+                return;
+            }
+            const maxId = files[0].id;
+            if (lastMaxId !== null && maxId === lastMaxId) {
+                // No new records, do nothing
+                return;
+            }
+            lastMaxId = maxId;
             filesList = files;
             filesTableBody.innerHTML = '';
             files.forEach((f, idx) => {
@@ -74,10 +89,10 @@ function fetchFiles() {
                 filesTableBody.appendChild(row);
             });
             // Show first summary by default if available
-            if (files.length > 0) {
+            if (updateSummary && files.length > 0) {
                 showSummary(0);
                 highlightRow(filesTableBody.rows[0]);
-            } else {
+            } else if (files.length === 0) {
                 summaryBox.value = '';
             }
         });
@@ -115,12 +130,20 @@ document.getElementById('uploadForm').onsubmit = function(e) {
     .catch(() => statusDiv.textContent = 'Upload failed.');
 };
 
+function startPolling() {
+    if (pollingInterval) clearInterval(pollingInterval);
+    pollingInterval = setInterval(() => fetchFiles(false), 3000); // poll every 3 seconds
+}
+
 // Add highlight style
 const style = document.createElement('style');
 style.innerHTML = `.selected-row td { background: #e0f7fa !important; } textarea#summaryBox { font-family: monospace; }`;
 document.head.appendChild(style);
 
-fetchFiles();
+document.addEventListener('DOMContentLoaded', function() {
+    fetchFiles();
+    startPolling();
+});
 </script>
 </body>
 </html>

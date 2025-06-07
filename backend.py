@@ -42,9 +42,9 @@ async def upload_pdf(file: UploadFile = File(...)):
 @app.get("/files")
 def list_files():
     with sqlite3.connect(config.DB_PATH) as conn:
-        rows = conn.execute("SELECT file_name, upload_date, processed_date, summary FROM pdfs ORDER BY id DESC").fetchall()
+        rows = conn.execute("SELECT id, file_name, upload_date, processed_date, summary FROM pdfs ORDER BY id DESC").fetchall()
     files = [
-        {"file_name": r[0], "upload_date": r[1], "processed_date":r[2], "summary": r[3]} for r in rows
+        {"id": r[0], "file_name": r[1], "upload_date": r[2], "processed_date": r[3], "summary": r[4]} for r in rows
     ]
     return JSONResponse(content=files)
 
