@@ -40,7 +40,7 @@
     </div>
 </div>
 <script>
-const apiBase = 'http://localhost:8000';
+const apiBase = window.location.origin;
 const statusDiv = document.getElementById('status');
 const filesTableBody = document.querySelector('#filesTable tbody');
 const summaryBox = document.getElementById('summaryBox');
@@ -132,7 +132,7 @@ document.getElementById('uploadForm').onsubmit = function(e) {
 
 function startPolling() {
     if (pollingInterval) clearInterval(pollingInterval);
-    pollingInterval = setInterval(() => fetchFiles(false), 3000); // poll every 3 seconds
+    pollingInterval = setInterval(() => fetchFiles(false), 30000); // poll every 30 seconds
 }
 
 // Add highlight style

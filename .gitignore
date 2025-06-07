@@ -3,3 +3,5 @@ pdfs.db
 uploads/*
 .env
 __pycache__/*
+app/__pycache__/*
+deploy/*
