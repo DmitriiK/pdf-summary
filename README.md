@@ -1,6 +1,37 @@
 # PDF Summary Application
 
-![Application Screenshot](application_screenshot.png)
+![Application Screenshot](static/application_screenshot.png)
+
+## Project Structure
+
+```
+pdf-summary/
+│
+├── app/
+│   ├── __init__.py
+│   ├── main.py           # Entry point for FastAPI app
+│   ├── config.py
+│   ├── processor.py
+│   ├── data_classes.py
+│   └── backend.py
+│
+├── static/
+│   └── application_screenshot.png
+│
+├── templates/
+│   └── index.html
+│
+├── uploads/
+│   └── ...pdf files...
+│
+├── pdfs.db
+├── README.md
+├── launch_instructions.md
+├── prompt.md
+├── pyproject.toml
+├── uv.lock
+└── .gitignore
+```
 
 ## Overview
 This application allows users to upload PDF files, which are then summarized using the Gemini API. The results are displayed in a user-friendly web interface, with summaries and file metadata stored in a SQLite database. The backend is built with FastAPI and processes files asynchronously using Azure queues.
@@ -17,8 +48,8 @@ This application allows users to upload PDF files, which are then summarized usi
   - Automatic polling for new records
 
 ## Tech Stack
-- **Front-End:** HTML, CSS, JavaScript
-- **Back-End:** Python (FastAPI)
+- **Front-End:** HTML, CSS, JavaScript (in `templates/`)
+- **Back-End:** Python (FastAPI, in `app/`)
 - **Database:** SQLite
 - **Async Processing:** Azure Queues
 - **Package Manager:** uv

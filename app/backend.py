@@ -4,10 +4,10 @@ from fastapi.responses import JSONResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 import os
-from azure.storage.queue import QueueClient
-import config
 import sqlite3
-from data_classes import MessageData
+from azure.storage.queue import QueueClient
+from app import config
+from app.data_classes import MessageData
 
 logging.basicConfig(level=logging.INFO)
 app = FastAPI()
@@ -50,4 +50,4 @@ def list_files():
 
 @app.get("/")
 def root():
-    return FileResponse("index.html")
+    return FileResponse("templates/index.html")
