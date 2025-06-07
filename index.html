@@ -11,6 +11,8 @@
         table { width: 100%; border-collapse: collapse; margin-top: 2em; }
         th, td { border: 1px solid #ccc; padding: 0.5em; text-align: left; }
         th { background: #f0f0f0; }
+        .selected-row td { background: #e0f7fa !important; }
+        textarea#summaryBox { font-family: monospace; }
     </style>
 </head>
 <body>
@@ -21,34 +23,73 @@
         <button type="submit">Upload</button>
     </form>
     <div class="status" id="status"></div>
-    <h3>Uploaded Files</h3>
-    <table id="filesTable">
-        <thead>
-            <tr><th>File Name</th><th>Upload Date</th><th>Processed Date</th><th>Summary</th></tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <div style="display: flex; flex-direction: column; gap: 2em;">
+        <div>
+            <h3>Uploaded Files</h3>
+            <table id="filesTable">
+                <thead>
+                    <tr><th>File Name</th><th>Upload Date</th><th>Processed Date</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div>
+            <h3>Summary</h3>
+            <textarea id="summaryBox" readonly style="width:100%; height:150px; resize:vertical; overflow:auto;"></textarea>
+        </div>
+    </div>
 </div>
 <script>
 const apiBase = 'http://localhost:8000';
 const statusDiv = document.getElementById('status');
 const filesTableBody = document.querySelector('#filesTable tbody');
+const summaryBox = document.getElementById('summaryBox');
+let filesList = [];
 
 function fetchFiles() {
     fetch(`${apiBase}/files`)
         .then(r => r.json())
         .then(files => {
+            filesList = files;
             filesTableBody.innerHTML = '';
-            files.forEach(f => {
-                // Format upload_date without milliseconds
+            files.forEach((f, idx) => {
                 let uploadDate = f.upload_date ? new Date(f.upload_date) : null;
                 let formattedUploadDate = uploadDate && !isNaN(uploadDate) ? uploadDate.toISOString().replace('T', ' ').substring(0, 19) : '';
                 let processedDate = f.processed_date ? new Date(f.processed_date) : null;
                 let formattedProcessedDate = processedDate && !isNaN(processedDate) ? processedDate.toISOString().replace('T', ' ').substring(0, 19) : '';
-                const row = `<tr><td>${f.file_name}</td><td>${formattedUploadDate}</td><td>${formattedProcessedDate}</td><td>${f.summary}</td></tr>`;
-                filesTableBody.innerHTML += row;
+                const row = document.createElement('tr');
+                const fileNameCell = document.createElement('td');
+                const link = document.createElement('a');
+                link.href = '#';
+                link.textContent = f.file_name;
+                link.onclick = function(e) {
+                    e.preventDefault();
+                    showSummary(idx);
+                    highlightRow(row);
+                };
+                fileNameCell.appendChild(link);
+                row.appendChild(fileNameCell);
+                row.appendChild(document.createElement('td')).textContent = formattedUploadDate;
+                row.appendChild(document.createElement('td')).textContent = formattedProcessedDate;
+                filesTableBody.appendChild(row);
             });
+            // Show first summary by default if available
+            if (files.length > 0) {
+                showSummary(0);
+                highlightRow(filesTableBody.rows[0]);
+            } else {
+                summaryBox.value = '';
+            }
         });
+}
+
+function showSummary(idx) {
+    summaryBox.value = filesList[idx]?.summary || '';
+}
+
+function highlightRow(row) {
+    Array.from(filesTableBody.rows).forEach(r => r.classList.remove('selected-row'));
+    row.classList.add('selected-row');
 }
 
 document.getElementById('uploadForm').onsubmit = function(e) {
@@ -73,6 +114,11 @@ document.getElementById('uploadForm').onsubmit = function(e) {
     })
     .catch(() => statusDiv.textContent = 'Upload failed.');
 };
+
+// Add highlight style
+const style = document.createElement('style');
+style.innerHTML = `.selected-row td { background: #e0f7fa !important; } textarea#summaryBox { font-family: monospace; }`;
+document.head.appendChild(style);
 
 fetchFiles();
 </script>
