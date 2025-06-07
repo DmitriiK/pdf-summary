@@ -1,4 +1,4 @@
-# How to Launch and Run Locally (Sprint 2)
+
 
 ## Prerequisites
 - Python 3.12+
