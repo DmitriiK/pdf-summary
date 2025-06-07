@@ -6,30 +6,23 @@
 - Azure Storage Account and Queue (for async processing)
 - Gemini API access (for PDF summarization, placeholder in code)
 
-## 1. Clone the repository and enter the project directory
 
-```
-git clone <your-repo-url>
-cd pdf-summary
-```
-
-## 2. Install dependencies
+## 1. Install dependencies
 
 ```
 uv pip install --system
 ```
 
-## 3. Configure environment variables
+## 2. Configure environment variables and configuration parameters
 
-Edit the `.env` file with your Azure and Gemini credentials:
+Create the `.env` file with your Azure and Gemini credentials:
 
 ```
-AZURE_QUEUE_CONNECTION_STRING=your_connection_string
-GEMINI_TOKEN=your_gemini_token
-DB_PATH=pdfs.db
-STORAGE_ACCOUNT_NAME=your_storage_account
-QUEUE_NAME=your_queue_name
+AZURE_QUEUE_CONNECTION_STRING="DefaultEndpointsProtocol=https;AccountName=sadkqueue;AccountKey=VsvnXXX;EndpointSuffix=core.windows.net"
+GEMINI_API_KEY=AIxxxx
 ```
+Do necessary changes in config.py if needed
+## 3. Create DB by launching of  init.py 
 
 ## 4. Start the FastAPI backend
 
@@ -53,7 +46,6 @@ python processor.py
 This will process messages from the Azure Queue, summarize PDFs (placeholder), and update the database.
 
 ## Notes
-- The Gemini summarization is a placeholder. Integrate the real API as needed.
+
 - All configuration is in `.env` and `config.py`.
-- Uploaded PDFs are stored in the `uploads/` directory.
 - Results are persisted in SQLite (`pdfs.db`).
