@@ -1,7 +1,6 @@
 from pydantic import BaseModel
-from datetime import datetime
 
 class MessageData(BaseModel):
     file_name: str
     file_path: str
-    upload_date: datetime
+    upload_date: str # ISO format string, we have some issues with datetime serialization 

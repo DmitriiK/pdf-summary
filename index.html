@@ -24,7 +24,7 @@
     <h3>Uploaded Files</h3>
     <table id="filesTable">
         <thead>
-            <tr><th>File Name</th><th>Upload Date</th><th>Summary</th></tr>
+            <tr><th>File Name</th><th>Upload Date</th><th>Processed Date</th><th>Summary</th></tr>
         </thead>
         <tbody></tbody>
     </table>
@@ -40,7 +40,12 @@ function fetchFiles() {
         .then(files => {
             filesTableBody.innerHTML = '';
             files.forEach(f => {
-                const row = `<tr><td>${f.file_name}</td><td>${f.upload_date}</td><td>${f.summary}</td></tr>`;
+                // Format upload_date without milliseconds
+                let uploadDate = f.upload_date ? new Date(f.upload_date) : null;
+                let formattedUploadDate = uploadDate && !isNaN(uploadDate) ? uploadDate.toISOString().replace('T', ' ').substring(0, 19) : '';
+                let processedDate = f.processed_date ? new Date(f.processed_date) : null;
+                let formattedProcessedDate = processedDate && !isNaN(processedDate) ? processedDate.toISOString().replace('T', ' ').substring(0, 19) : '';
+                const row = `<tr><td>${f.file_name}</td><td>${formattedUploadDate}</td><td>${formattedProcessedDate}</td><td>${f.summary}</td></tr>`;
                 filesTableBody.innerHTML += row;
             });
         });
@@ -59,7 +64,7 @@ document.getElementById('uploadForm').onsubmit = function(e) {
     })
     .then(r => r.json())
     .then(res => {
-        if (res.status === 'success') {
+        if (res.status === 'success' ) {
             statusDiv.textContent = 'Upload successful!';
             fetchFiles();
         } else {

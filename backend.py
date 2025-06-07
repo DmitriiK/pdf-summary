@@ -34,17 +34,17 @@ async def upload_pdf(file: UploadFile = File(...)):
         f.write(await file.read())
     logging.info(f'adding of file {file_path} to the queue')
     queue_client = QueueClient.from_connection_string(config.AZURE_QUEUE_CONNECTION_STRING, config.QUEUE_NAME)
-    message_data = MessageData(file_name=file.filename, file_path=file_path, upload_date=datetime.now())
+    message_data = MessageData(file_name=file.filename, file_path=file_path, upload_date=datetime.now().isoformat())
     queue_client.send_message(message_data.model_dump_json())
     logging.info(f'Have added file {file_path} to the queue')
-    return {"status": "queued", "file_name": file.filename, "upload_date": datetime.now()}
+    return {"status": "success", "file_name": file.filename, "upload_date": datetime.now()}
 
 @app.get("/files")
 def list_files():
     with sqlite3.connect(config.DB_PATH) as conn:
-        rows = conn.execute("SELECT file_name, upload_date, summary FROM pdfs ORDER BY id DESC").fetchall()
+        rows = conn.execute("SELECT file_name, upload_date, processed_date, summary FROM pdfs ORDER BY id DESC").fetchall()
     files = [
-        {"file_name": r[0], "upload_date": r[1], "summary": r[2]} for r in rows
+        {"file_name": r[0], "upload_date": r[1], "processed_date":r[2], "summary": r[3]} for r in rows
     ]
     return JSONResponse(content=files)
 
