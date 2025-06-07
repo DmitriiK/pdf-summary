@@ -1,4 +1,3 @@
-
 import logging
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse, FileResponse
@@ -8,6 +7,7 @@ import os
 from azure.storage.queue import QueueClient
 import config
 import sqlite3
+from data_classes import MessageData
 
 logging.basicConfig(level=logging.INFO)
 app = FastAPI()
@@ -33,9 +33,9 @@ async def upload_pdf(file: UploadFile = File(...)):
     with open(file_path, "wb") as f:
         f.write(await file.read())
     logging.info(f'adding of file {file_path} to the queue')
-    queue_client = QueueClient.from_connection_string(
-        config.AZURE_QUEUE_CONNECTION_STRING, config.QUEUE_NAME)
-    queue_client.send_message(file_path)
+    queue_client = QueueClient.from_connection_string(config.AZURE_QUEUE_CONNECTION_STRING, config.QUEUE_NAME)
+    message_data = MessageData(file_name=file.filename, file_path=file_path, upload_date=datetime.now())
+    queue_client.send_message(message_data.model_dump_json())
     logging.info(f'Have added file {file_path} to the queue')
     return {"status": "queued", "file_name": file.filename, "upload_date": datetime.now()}
 
