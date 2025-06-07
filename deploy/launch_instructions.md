@@ -27,7 +27,7 @@ Do necessary changes in config.py if needed
 ## 4. Start the FastAPI backend
 
 ```
-uvicorn backend:app --reload
+ uvicorn app.backend:app --reload
 ```
 - The app will be available at http://127.0.0.1:8000
 - The default page (index.html) will open at the root URL
@@ -41,7 +41,7 @@ Go to http://127.0.0.1:8000 in your browser.
 In a separate terminal:
 
 ```
-python processor.py
+python app/python processor.py
 ```
 This will process messages from the Azure Queue, summarize PDFs (placeholder), and update the database.
 
