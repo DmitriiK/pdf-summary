@@ -24,26 +24,20 @@ GEMINI_API_KEY=AIxxxx
 Do necessary changes in config.py if needed
 ## 3. Create DB by launching of  deploy/init.py
 python -m deploy.init
-## 4. Start the FastAPI backend
+## 4. Start the FastAPI backend and processor (queue consumer)
+
+Run the following script to start both the FastAPI backend and the processor in separate Terminal windows:
 
 ```
- uvicorn app.backend:app --host 0.0.0.0 --port 8000
+./run_all.sh
 ```
+
 - The app will be available at http://127.0.0.1:8000 for local development (or by external ip address)
 - The default page (index.html) will open at the root URL
 
 ## 5. Open the web UI
 
-Go to http://127.0.0.1:8000 in your browser.
-
-## 6. Start the processor (queue consumer)
-
-In a separate terminal:
-
-```
-python app/python processor.py
-```
-This will process messages from the Azure Queue, summarize PDFs (placeholder), and update the database.
+Go to http://127.0.0.1:8000 in your browser (or by external ip address).
 
 ## Notes
 
