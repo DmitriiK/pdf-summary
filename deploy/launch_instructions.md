@@ -25,7 +25,10 @@ Do necessary changes in config.py if needed
 ## 3. Create DB by launching of  deploy/init.py
 python -m deploy.init
 ## 4. Start the FastAPI backend and processor (queue consumer)
-
+Before the first run
+```
+chmod +x run_all.sh
+```
 Run the following script to start both the FastAPI backend and the processor in separate Terminal windows:
 
 ```
@@ -44,3 +47,4 @@ Go to http://127.0.0.1:8000 in your browser (or by external ip address).
 - All configuration is in `.env` and `config.py`.
 - Results are persisted in SQLite (`pdfs.db`).
 - for remote deployment on cloud VM neeed to add inbound allow rule for TCP 8000 port
+- to clean-up DB use command like ```sqlite3 pdfs.db "DELETE FROM pdfs;"```
